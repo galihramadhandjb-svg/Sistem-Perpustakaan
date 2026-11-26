@@ -4,16 +4,14 @@
     @include('admin-lte/flash')
 
     <div class="btn-group mb-3">
-        <button wire:click="format" class="btn btn-sm bg-teal mr-2">Semua</button>
-        <button wire:click="belumDipinjam" class="btn btn-sm bg-indigo mr-2">Belum Dipinjam</button>
-        <button wire:click="sedangDipinjam" class="btn btn-sm bg-olive mr-2">Sedang Dipinjam</button>
-        <button wire:click="selesaiDipinjam" class="btn btn-sm bg-fuchsia mr-2">Selesai Dipinjam</button>
+        <button type="button" wire:click="format" class="btn btn-sm bg-teal mr-2">Semua</button>
+        <button type="button" wire:click="belumDipinjam" class="btn btn-sm bg-indigo mr-2">Belum Dipinjam</button>
+        <button type="button" wire:click="sedangDipinjam" class="btn btn-sm bg-olive mr-2">Sedang Dipinjam</button>
+        <button type="button" wire:click="selesaiDipinjam" class="btn btn-sm bg-fuchsia mr-2">Selesai Dipinjam</button>
     </div>
 
     <div class="card">
         <div class="card-header">
-        <span wire:click="create" class="btn btn-sm btn-primary">Tambah</span>
-
             <div class="card-tools">
                 <div class="input-group input-group-sm" style="width: 150px;">
                 <input wire:model="search" type="search" name="table_search" class="form-control float-right" placeholder="Search">

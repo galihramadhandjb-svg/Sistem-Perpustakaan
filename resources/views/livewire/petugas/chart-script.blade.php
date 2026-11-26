@@ -30,26 +30,8 @@ var myChart = new Chart(ctx, {
 });
 
 Livewire.on('ubahBulanTahun', (count, tanggal_pengembalian) => {
-    var ctx = document.getElementById('myChart');
-    var myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: tanggal_pengembalian,
-            datasets: [{
-                label: 'Selesai Dipinjam',
-                data: count,
-                backgroundColor: '#f012be',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            events: ['mouseout', 'touchstart', 'touchmove'],
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
+    myChart.data.labels = tanggal_pengembalian;
+    myChart.data.datasets[0].data = count;
+    myChart.update();
 })
 </script>

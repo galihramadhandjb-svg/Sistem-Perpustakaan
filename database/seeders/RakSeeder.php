@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Kategori;
 use App\Models\Rak;
 use Illuminate\Database\Seeder;
 
@@ -14,38 +15,31 @@ class RakSeeder extends Seeder
      */
     public function run()
     {
-        Rak::create([
-            'rak' => 0,
-            'baris' => 0,
-            'kategori_id' => 1,
-            'slug' => 0
-        ]);
+        Rak::where('slug', '0')
+            ->whereNotIn('id', function ($query) {
+                $query->select('rak_id')->from('buku');
+            })
+            ->delete();
 
-        for ($i=1; $i <= 5; $i++) {
-            Rak::create([
-                'rak' => 1,
-                'baris' => $i,
-                'kategori_id' => 2,
-                'slug' => 1 .'-' .$i
-            ]);
-        }
+        foreach ([
+            'novel' => 1,
+            'sejarah' => 2,
+            'komik' => 3,
+            'religi' => 4,
+            'biografi' => 5,
+        ] as $kategoriSlug => $nomorRak) {
+            $kategori = Kategori::where('slug', $kategoriSlug)->firstOrFail();
 
-        for ($i = 1; $i <= 5; $i++) {
-            Rak::create([
-                'rak' => 2,
-                'baris' => $i,
-                'kategori_id' => 3,
-                'slug' => 2 . '-' . $i
-            ]);
-        }
-       
-        for ($i = 1; $i <= 5; $i++) {
-            Rak::create([
-                'rak' => 3,
-                'baris' => $i,
-                'kategori_id' => 6,
-                'slug' => 3 . '-' . $i
-            ]);
+            for ($baris = 1; $baris <= 5; $baris++) {
+                Rak::updateOrCreate(
+                    ['slug' => $nomorRak.'-'.$baris],
+                    [
+                        'rak' => $nomorRak,
+                        'baris' => $baris,
+                        'kategori_id' => $kategori->id,
+                    ]
+                );
+            }
         }
     }
 }

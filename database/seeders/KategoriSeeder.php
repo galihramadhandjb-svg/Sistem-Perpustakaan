@@ -15,14 +15,13 @@ class KategoriSeeder extends Seeder
      */
     public function run()
     {
-        $kategori = ['none', 'novel', 'sejarah', 'religi', 'biografi', 'komik'];
+        $kategori = ['novel', 'sejarah', 'religi', 'biografi', 'komik'];
 
         foreach ($kategori as $value) {
-            Kategori::create([
-                'nama' => $value,
-                'slug' => Str::slug($value)
-            ]);
+            Kategori::firstOrCreate(
+                ['slug' => Str::slug($value)],
+                ['nama' => $value]
+            );
         }
-       
     }
 }

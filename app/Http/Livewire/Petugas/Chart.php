@@ -11,41 +11,35 @@ class Chart extends Component
 {
     public $bulan_tahun;
 
+    public function mount()
+    {
+        $this->bulan_tahun = date('Y-m');
+    }
+
     public function render()
     {
-        if ($this->bulan_tahun) {
-            $bulan = substr($this->bulan_tahun, -2);
-            $tahun = substr($this->bulan_tahun, 0, 4);
+        $bulanTahun = $this->bulan_tahun ?: date('Y-m');
+        $mulai = Carbon::createFromFormat('Y-m', $bulanTahun)->startOfMonth();
+        $jumlahHari = $mulai->daysInMonth;
+        $countPerHari = array_fill(1, $jumlahHari, 0);
 
-            $selesai_dipinjam = Peminjaman::select(DB::raw('count(*) as count, tanggal_pengembalian'))
-                ->groupBy('tanggal_pengembalian')
-                ->whereMonth('tanggal_pengembalian', $bulan)
-                ->whereYear('tanggal_pengembalian', $tahun)
-                ->where('status', 3)
-                ->get();
+        $selesaiDipinjam = DB::table('peminjaman')
+            ->select('tanggal_pengembalian', DB::raw('count(*) as count'))
+            ->where('status', 3)
+            ->whereBetween('tanggal_pengembalian', [
+                $mulai->toDateString(),
+                $mulai->copy()->endOfMonth()->toDateString()
+            ])
+            ->groupBy('tanggal_pengembalian')
+            ->get();
 
-            $hari_per_bulan = Carbon::parse($this->bulan_tahun)->daysInMonth;
-
-            $tanggal_pengembalian = [];
-            $count = [];
-            for ($i = 1; $i <= $hari_per_bulan; $i++) {
-                for ($j = 0; $j < count($selesai_dipinjam); $j++) {
-                    if (substr($selesai_dipinjam[$j]->tanggal_pengembalian, 0, 2) == $i) {
-                        $tanggal_pengembalian[$i] = substr($selesai_dipinjam[$j]->tanggal_pengembalian, 0, 2);
-                        $count[$i] = $selesai_dipinjam[$j]->count;
-                        break;
-                    } else {
-                        $tanggal_pengembalian[$i] = $i;
-                        $count[$i] = 0;
-                    }
-                }
-            }
-
-            $count = collect($count)->flatten();
-            $tanggal_pengembalian = collect($tanggal_pengembalian)->flatten();
-
-            $this->emit('ubahBulanTahun', $count, $tanggal_pengembalian);
+        foreach ($selesaiDipinjam as $item) {
+            $hari = Carbon::parse($item->tanggal_pengembalian)->day;
+            $countPerHari[$hari] = (int) $item->count;
         }
+
+        $this->emit('ubahBulanTahun', array_values($countPerHari), range(1, $jumlahHari));
+
         return view('livewire.petugas.chart');
     }
 }

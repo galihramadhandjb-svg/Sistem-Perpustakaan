@@ -35,10 +35,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/chart', ChartController::class);
     });
 
-    // role peminjam
-    Route::middleware(['role:peminjam'])->group(function () {
-        Route::get('/keranjang', KeranjangController::class);
-    });
+    Route::get('/keranjang', KeranjangController::class)->middleware('borrower');
 
     // role admin
     Route::middleware(['role:admin'])->group(function () {

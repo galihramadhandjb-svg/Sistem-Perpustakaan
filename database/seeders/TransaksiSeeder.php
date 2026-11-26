@@ -2,88 +2,87 @@
 
 namespace Database\Seeders;
 
+use App\Models\Buku;
 use App\Models\DetailPeminjaman;
 use App\Models\Peminjaman;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use RuntimeException;
 
 class TransaksiSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
-        // data 1
-        Peminjaman::create([
-            'kode_pinjam' => random_int(100000000, 999999999),
-            'peminjam_id' => 3,
-            'petugas_pinjam' => 1,
-            'petugas_kembali' => 1,
-            'status' => 3,
-            'denda' => 0,
-            'tanggal_pinjam' => now()->subDays(20),
-            'tanggal_kembali' => now()->subDays(10),
-            'tanggal_pengembalian' => now()->subDays(11)
-        ]);
-        
-        DetailPeminjaman::create([
-            'peminjaman_id' => 1,
-            'buku_id' => 1
-        ]);
-        DetailPeminjaman::create([
-            'peminjaman_id' => 1,
-            'buku_id' => 2
-        ]);
-       
-        // data 2
-        Peminjaman::create([
-            'kode_pinjam' => random_int(100000000, 999999999),
-            'peminjam_id' => 3,
-            'petugas_pinjam' => 2,
-            'status' => 2,
-            'tanggal_pinjam' => now(),
-            'tanggal_kembali' => now()->addDays(10)
-        ]);
-        
-        DetailPeminjaman::create([
-            'peminjaman_id' => 2,
-            'buku_id' => 4
-        ]);
-        DetailPeminjaman::create([
-            'peminjaman_id' => 2,
-            'buku_id' => 5
-        ]);
-      
-        // data 3
-        Peminjaman::create([
-            'kode_pinjam' => random_int(100000000, 999999999),
-            'peminjam_id' => 4,
-            'status' => 1,
-            'tanggal_pinjam' => now()->addDays(10),
-            'tanggal_kembali' => now()->addDays(20)
-        ]);
-        
-        DetailPeminjaman::create([
-            'peminjaman_id' => 3,
-            'buku_id' => 6
-        ]);
-        DetailPeminjaman::create([
-            'peminjaman_id' => 3,
-            'buku_id' => 7
-        ]);
-       
-        // data 4
-        Peminjaman::create([
-            'kode_pinjam' => random_int(100000000, 999999999),
-            'peminjam_id' => 5,
-            'status' => 0,
-        ]);
-        
-        DetailPeminjaman::create([
-            'peminjaman_id' => 4,
-            'buku_id' => 3
-        ]);
+        $peminjam = User::role('peminjam')->orderBy('id')->take(3)->get();
+        if ($peminjam->count() < 3) {
+            throw new RuntimeException('Seeder transaksi memerlukan tiga akun peminjam.');
+        }
+
+        $petugas = User::role('petugas')->orderBy('id')->firstOrFail();
+
+        $transaksiContoh = [
+            [
+                'kode_pinjam' => 'DEMO-PENDING-001',
+                'peminjam_id' => $peminjam[0]->id,
+                'status' => 1,
+                'tanggal_pinjam' => today()->toDateString(),
+                'tanggal_kembali' => today()->addDays(10)->toDateString(),
+                'petugas_pinjam' => null,
+                'petugas_kembali' => null,
+                'tanggal_pengembalian' => null,
+                'denda' => 0,
+                'buku' => 'bintang',
+            ],
+            [
+                'kode_pinjam' => 'DEMO-ACTIVE-001',
+                'peminjam_id' => $peminjam[1]->id,
+                'status' => 2,
+                'tanggal_pinjam' => today()->subDays(2)->toDateString(),
+                'tanggal_kembali' => today()->addDays(8)->toDateString(),
+                'petugas_pinjam' => $petugas->id,
+                'petugas_kembali' => null,
+                'tanggal_pengembalian' => null,
+                'denda' => 0,
+                'buku' => 'gusdur',
+            ],
+            [
+                'kode_pinjam' => 'DEMO-RETURNED-001',
+                'peminjam_id' => $peminjam[2]->id,
+                'status' => 3,
+                'tanggal_pinjam' => today()->subDays(12)->toDateString(),
+                'tanggal_kembali' => today()->subDays(2)->toDateString(),
+                'petugas_pinjam' => $petugas->id,
+                'petugas_kembali' => $petugas->id,
+                'tanggal_pengembalian' => today()->subDay()->toDateString(),
+                'denda' => 0,
+                'buku' => 'naruto-volume-58',
+            ],
+        ];
+
+        foreach ($transaksiContoh as $data) {
+            $buku = Buku::where('slug', $data['buku'])->firstOrFail();
+            $peminjaman = Peminjaman::firstOrCreate(
+                ['kode_pinjam' => $data['kode_pinjam']],
+                [
+                    'peminjam_id' => $data['peminjam_id'],
+                    'status' => $data['status'],
+                    'tanggal_pinjam' => $data['tanggal_pinjam'],
+                    'tanggal_kembali' => $data['tanggal_kembali'],
+                    'petugas_pinjam' => $data['petugas_pinjam'],
+                    'petugas_kembali' => $data['petugas_kembali'],
+                    'tanggal_pengembalian' => $data['tanggal_pengembalian'],
+                    'denda' => $data['denda'],
+                ]
+            );
+
+            DetailPeminjaman::firstOrCreate([
+                'peminjaman_id' => $peminjaman->id,
+                'buku_id' => $buku->id,
+            ]);
+
+            if ($peminjaman->wasRecentlyCreated && $data['status'] === 2) {
+                $buku->decrement('stok');
+            }
+        }
     }
 }

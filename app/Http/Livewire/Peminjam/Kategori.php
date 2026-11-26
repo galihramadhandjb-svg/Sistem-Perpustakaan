@@ -46,7 +46,7 @@ class Kategori extends Component
     public function render()
     {
         return view('livewire.peminjam.kategori', [
-            'kategori' => ModelsKategori::where('id', '!=', 1)->get(),
+            'kategori' => ModelsKategori::where('slug', '!=', 'none')->get(),
             'count' => $this->count
         ]);
     }

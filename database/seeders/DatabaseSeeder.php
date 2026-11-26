@@ -20,8 +20,9 @@ class DatabaseSeeder extends Seeder
             RakSeeder::class,
             PenerbitSeeder::class,
             BukuSeeder::class,
+            ReligiBiografiSeeder::class,
+            RemoveNoneCategorySeeder::class,
             TransaksiSeeder::class,
-            PeminjamanSeeder::class,
-        ]);;
+        ]);
     }
 }

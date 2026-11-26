@@ -49,7 +49,7 @@ class Buku extends Component
         $this->format();
 
         $this->create = true;
-        $this->kategori = Kategori::all();
+        $this->kategori = Kategori::where('slug', '!=', 'none')->get();
         $this->penerbit = Penerbit::all();
     }
 
@@ -101,7 +101,7 @@ class Buku extends Component
         $this->kategori_id = $buku->kategori_id;
         $this->rak_id = $buku->rak_id;
         $this->penerbit_id = $buku->penerbit_id;
-        $this->kategori = Kategori::all();
+        $this->kategori = Kategori::where('slug', '!=', 'none')->get();
         $this->rak = Rak::where('kategori_id', $buku->kategori_id)->get();
         $this->penerbit = Penerbit::all();
     }

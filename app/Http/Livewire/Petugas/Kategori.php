@@ -74,19 +74,12 @@ class Kategori extends Component
 
     public function destroy(ModelsKategori $kategori)
     {
-        $rak = Rak::where('kategori_id', $kategori->id)->get();
-        foreach ($rak as $key => $value) {
-            $value->update([
-                'kategori_id' => 1
-            ]);
+        if (Buku::where('kategori_id', $kategori->id)->exists()) {
+            session()->flash('gagal', 'Kategori masih memiliki buku. Pindahkan atau hapus buku terlebih dahulu.');
+            return;
         }
 
-        $buku = Buku::where('kategori_id', $kategori->id)->get();
-        foreach ($buku as $key => $value) {
-            $value->update([
-                'kategori_id' => 1
-            ]);
-        }
+        Rak::where('kategori_id', $kategori->id)->delete();
 
         $kategori->delete();
 
@@ -103,9 +96,12 @@ class Kategori extends Component
     public function render()
     {
         if ($this->search) {
-            $kategori = ModelsKategori::latest()->where('nama', 'like', '%'. $this->search .'%')->paginate(5);
+            $kategori = ModelsKategori::where('slug', '!=', 'none')
+                ->where('nama', 'like', '%'. $this->search .'%')
+                ->latest()
+                ->paginate(5);
         } else {
-            $kategori = ModelsKategori::latest()->paginate(5);
+            $kategori = ModelsKategori::where('slug', '!=', 'none')->latest()->paginate(5);
         }
         
         return view('livewire.petugas.kategori', [
