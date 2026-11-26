@@ -5,6 +5,7 @@ namespace App\Http\Livewire\Peminjam;
 use App\Models\DetailPeminjaman;
 use App\Models\Peminjaman;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class Keranjang extends Component
@@ -71,6 +72,24 @@ class Keranjang extends Component
         ]);
 
         session()->flash('sukses', 'Buku berhasil dipinjam');
+    }
+
+    public function batalkan(Peminjaman $peminjaman)
+    {
+        abort_unless($peminjaman->peminjam_id === auth()->id(), 403);
+
+        if ($peminjaman->status !== 1) {
+            session()->flash('gagal', 'Hanya pengajuan yang belum diproses petugas yang dapat dibatalkan.');
+            return;
+        }
+
+        DB::transaction(function () use ($peminjaman) {
+            $peminjaman->detail_peminjaman()->delete();
+            $peminjaman->delete();
+        });
+
+        session()->flash('sukses', 'Pengajuan peminjaman berhasil dibatalkan.');
+        return redirect('/');
     }
 
     public function render()

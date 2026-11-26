@@ -31,6 +31,7 @@
                 <thead>
                 <tr>
                     <th width="10%">No</th>
+                    <th>Sampul</th>
                     <th>Judul</th>
                     <th>Penulis</th>
                     <th>Kategori</th>
@@ -41,6 +42,7 @@
                 @foreach ($buku as $item)
                     <tr>
                         <td>{{$loop->iteration}}</td>
+                        <td><img src="/storage/{{$item->sampul}}" alt="{{$item->judul}}" width="60" height="80"></td>
                         <td>{{$item->judul}}</td>
                         <td>{{$item->penulis}}</td>
                         <td>{{$item->kategori->nama}}</td>

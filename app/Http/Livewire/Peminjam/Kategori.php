@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Peminjam;
 
+use App\Models\Kategori as ModelsKategori;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -22,6 +23,16 @@ class Kategori extends Component
         }
     }
 
+    public function pilihKategori($id)
+    {
+        $this->emit('pilihKategori', $id);
+    }
+
+    public function semuaKategori()
+    {
+        $this->emit('semuaKategori');
+    }
+
     public function tambahKeranjang()
     {
         $this->count += 1;
@@ -35,6 +46,7 @@ class Kategori extends Component
     public function render()
     {
         return view('livewire.peminjam.kategori', [
+            'kategori' => ModelsKategori::where('slug', '!=', 'none')->get(),
             'count' => $this->count
         ]);
     }
