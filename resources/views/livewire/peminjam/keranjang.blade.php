@@ -23,7 +23,6 @@
                 <button wire:click="pinjam({{$keranjang->id}})" class="btn btn-sm btn-success">Ajukan Peminjaman</button>
             @elseif ($keranjang->status === 1)
                 <span class="badge badge-warning">Menunggu diproses petugas</span>
-                <button wire:click="batalkan({{$keranjang->id}})" class="btn btn-sm btn-danger ml-2">Batalkan Pengajuan</button>
             @elseif ($keranjang->status === 2)
                 <span class="badge badge-info">Sedang dipinjam</span>
             @endif
